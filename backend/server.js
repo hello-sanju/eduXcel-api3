@@ -1,4 +1,4 @@
-const express = require('express');
+  const express = require('express');
 const cors = require('cors');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -219,7 +219,37 @@ app.use('/api/profile', profileRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/forgotpassword', forgotPasswordRouter);
 app.use('/api/reset-password', resetPasswordRouter);
+// Endpoint to get the current ratings
+app.get('/ratings', (req, res) => {
+  fs.readFile('ratings.json', (err, data) => {
+    if (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      const ratings = JSON.parse(data);
+      res.json(ratings);
+    }
+  });
+});
 
+// Endpoint to update the ratings
+app.post('/ratings', (req, res) => {
+  const newRating = req.body;
+  fs.readFile('ratings.json', (err, data) => {
+    if (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      let ratings = JSON.parse(data);
+      ratings = { ...ratings, ...newRating }; // Merge new rating with existing ratings
+      fs.writeFile('ratings.json', JSON.stringify(ratings), (err) => {
+        if (err) {
+          res.status(500).json({ error: 'Internal Server Error' });
+        } else {
+          res.json(ratings);
+        }
+      });
+    }
+  });
+});
 
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
