@@ -222,6 +222,7 @@ app.use('/api/courses', coursesRouter);
 app.use('/api/forgotpassword', forgotPasswordRouter);
 app.use('/api/reset-password', resetPasswordRouter);
 // Define a schema for the ratings
+// Define a schema for the ratings
 const ratingSchema = new mongoose.Schema({
   userId: String,
   rating: Number,
@@ -247,21 +248,20 @@ app.get('/ratings', async (req, res) => {
 app.post('/ratings', async (req, res) => {
   const { userId, rating } = req.body;
   try {
-    const existingRating = await Rating.findOne({ userId });
+    let existingRating = await Rating.findOne({ userId });
     if (existingRating) {
       existingRating.rating = rating;
-      await existingRating.save();
-      res.json(existingRating);
     } else {
-      const newRating = new Rating({ userId, rating });
-      await newRating.save();
-      res.json(newRating);
+      existingRating = new Rating({ userId, rating });
     }
+    await existingRating.save();
+    res.json(existingRating);
   } catch (error) {
     console.error('Error updating ratings:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
     console.log('Received a request to update user profile');
