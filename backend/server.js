@@ -20,6 +20,8 @@ const jwt = require('jsonwebtoken'); // Import the jsonwebtoken package
 const { verifyGoogleToken } = require('./middleware/authMiddleware');
 const cookieParser = require('cookie-parser');
 const mydb = mongoose.connection;
+const fs = require('fs');
+
 dotenv.config();
 const app = express();
 app.use(cookieParser());
