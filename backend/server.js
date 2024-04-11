@@ -250,20 +250,17 @@ app.get('/ratings', async (req, res) => {
 app.post('/ratings', async (req, res) => {
   const { userId, rating } = req.body;
   try {
-    let existingRating = await Rating.findOne({ userId });
-    if (existingRating) {
-      existingRating.rating = rating;
-    } else {
-      existingRating = new Rating({ userId, rating });
-    }
-    await existingRating.save();
+    const existingRating = await Rating.findOneAndUpdate(
+      { userId },
+      { rating },
+      { upsert: true, new: true }
+    );
     res.json(existingRating);
   } catch (error) {
     console.error('Error updating ratings:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
     console.log('Received a request to update user profile');
