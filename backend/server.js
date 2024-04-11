@@ -261,6 +261,39 @@ app.post('/ratings', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+const reviewSchema = new mongoose.Schema({
+  username: String,
+  comment: String,
+});
+
+// Define a model based on the schema
+const Review = mongoose.model('Review', reviewSchema);
+
+// Endpoint to post a review
+app.post('/reviews', async (req, res) => {
+  const { username, comment } = req.body;
+  try {
+    const newReview = new Review({ username, comment });
+    await newReview.save();
+    res.status(201).json(newReview);
+  } catch (error) {
+    console.error('Error posting review:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Endpoint to get all reviews
+app.get('/reviews', async (req, res) => {
+  try {
+    const reviews = await Review.find({});
+    res.json(reviews);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
     console.log('Received a request to update user profile');
