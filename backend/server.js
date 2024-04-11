@@ -221,38 +221,47 @@ app.use('/api/profile', profileRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/forgotpassword', forgotPasswordRouter);
 app.use('/api/reset-password', resetPasswordRouter);
+// Define a schema for the ratings
+const ratingSchema = new mongoose.Schema({
+  userId: String,
+  rating: Number,
+});
+
+// Define a model based on the schema
+const Rating = mongoose.model('Rating', ratingSchema);
+
+app.use(express.json());
+
 // Endpoint to get the current ratings
-app.get('/ratings', (req, res) => {
-  fs.readFile('ratings.json', (err, data) => {
-    if (err) {
-      res.status(500).json({ error: 'Internal Server Error' });
-    } else {
-      const ratings = JSON.parse(data);
-      res.json(ratings);
-    }
-  });
+app.get('/ratings', async (req, res) => {
+  try {
+    const ratings = await Rating.find({});
+    res.json(ratings);
+  } catch (error) {
+    console.error('Error fetching ratings:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // Endpoint to update the ratings
-app.post('/ratings', (req, res) => {
-  const newRating = req.body;
-  fs.readFile('ratings.json', (err, data) => {
-    if (err) {
-      res.status(500).json({ error: 'Internal Server Error' });
+app.post('/ratings', async (req, res) => {
+  const { userId, rating } = req.body;
+  try {
+    const existingRating = await Rating.findOne({ userId });
+    if (existingRating) {
+      existingRating.rating = rating;
+      await existingRating.save();
+      res.json(existingRating);
     } else {
-      let ratings = JSON.parse(data);
-      ratings = { ...ratings, ...newRating }; // Merge new rating with existing ratings
-      fs.writeFile('ratings.json', JSON.stringify(ratings), (err) => {
-        if (err) {
-          res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-          res.json(ratings);
-        }
-      });
+      const newRating = new Rating({ userId, rating });
+      await newRating.save();
+      res.json(newRating);
     }
-  });
+  } catch (error) {
+    console.error('Error updating ratings:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
-
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
     console.log('Received a request to update user profile');
