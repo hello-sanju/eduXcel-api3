@@ -256,30 +256,6 @@ const reviewSchema = new mongoose.Schema({
 // Define a model based on the schema
 const Review = mongoose.model('Review', reviewSchema);
 
-// Endpoint to post a review
-app.post('/reviews', async (req, res) => {
-  const { username, comment } = req.body;
-  try {
-    const newReview = new Review({ username, comment });
-    await newReview.save();
-    res.status(201).json(newReview);
-  } catch (error) {
-    console.error('Error posting review:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Endpoint to get all reviews
-app.get('/reviews', async (req, res) => {
-  try {
-    const reviews = await Review.find({});
-    res.json(reviews);
-  } catch (error) {
-    console.error('Error fetching reviews:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 // Define a schema for the ratings
 const ratingSchema = new mongoose.Schema({
   userId: String,
@@ -288,33 +264,6 @@ const ratingSchema = new mongoose.Schema({
 
 // Define a model based on the schema
 const Rating = mongoose.model('Rating', ratingSchema);
-
-// Endpoint to get the current ratings
-app.get('/ratings', async (req, res) => {
-  try {
-    const ratings = await Rating.find({});
-    res.json(ratings);
-  } catch (error) {
-    console.error('Error fetching ratings:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Endpoint to update the ratings
-app.post('/ratings', async (req, res) => {
-  const { userId, rating } = req.body;
-  try {
-    const existingRating = await Rating.findOneAndUpdate(
-      { userId },
-      { rating },
-      { upsert: true, new: true }
-    );
-    res.json(existingRating);
-  } catch (error) {
-    console.error('Error updating ratings:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
 
 
 // Define Passport strategies
@@ -377,6 +326,62 @@ app.use('/api/profile', profileRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/forgotpassword', forgotPasswordRouter);
 app.use('/api/reset-password', resetPasswordRouter);
+
+
+// Endpoint to post a review
+app.post('/reviews', async (req, res) => {
+  const { username, comment } = req.body;
+  try {
+    const newReview = new Review({ username, comment });
+    await newReview.save();
+    res.status(201).json(newReview);
+  } catch (error) {
+    console.error('Error posting review:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Endpoint to get all reviews
+app.get('/reviews', async (req, res) => {
+  try {
+    const reviews = await Review.find({});
+    res.json(reviews);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Endpoint to get the current ratings
+app.get('/ratings', async (req, res) => {
+  try {
+    const ratings = await Rating.find({});
+    res.json(ratings);
+  } catch (error) {
+    console.error('Error fetching ratings:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Endpoint to update the ratings
+app.post('/ratings', async (req, res) => {
+  const { userId, rating } = req.body;
+  try {
+    const existingRating = await Rating.findOneAndUpdate(
+      { userId },
+      { rating },
+      { upsert: true, new: true }
+    );
+    res.json(existingRating);
+  } catch (error) {
+    console.error('Error updating ratings:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
 // Add a new API endpoint to fetch random blog titles
 app.get('/api/random-blog-titles', async (req, res) => {
   try {
